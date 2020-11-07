@@ -7,6 +7,8 @@ public interface ICommand {
 
     String getName();
 
+    String getHelp();
+
     default List<String> getAliases() {  // Default parceque pas obligé d'avoir des alias
         return List.of(); // equivalent de Arrays.asList
     }

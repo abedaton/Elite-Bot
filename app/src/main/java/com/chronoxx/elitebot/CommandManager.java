@@ -2,7 +2,8 @@ package com.chronoxx.elitebot;
 
 import com.chronoxx.elitebot.command.CommandContext;
 import com.chronoxx.elitebot.command.ICommand;
-import com.chronoxx.elitebot.command.commands.PingCommand;
+import com.chronoxx.elitebot.command.commands.*;
+import com.chronoxx.elitebot.command.commands.music.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import javax.annotation.Nullable;
@@ -17,6 +18,15 @@ public class CommandManager {
 
     public CommandManager(){
         addCommand(new PingCommand());
+        addCommand(new HelpCommands(this));
+        addCommand(new HasteCommand());
+        addCommand(new JoinCommand());
+        addCommand(new PlayCommand());
+        addCommand(new StopCommand());
+        addCommand(new SkipCommand());
+        addCommand(new NowPlayingCommand());
+        addCommand(new QueueCommand());
+        addCommand(new LeaveCommand());
     }
 
     private void addCommand(ICommand cmd){
@@ -29,8 +39,14 @@ public class CommandManager {
         commands.add(cmd);
     }
 
+
+    public List<ICommand> getCommands(){
+        return commands;
+    }
+
+
     @Nullable
-    private ICommand getCommand(String search){
+    public ICommand getCommand(String search){
         String searchLower = search.toLowerCase();
 
         for (ICommand cmd : this.commands) {

@@ -17,11 +17,20 @@ public class Listener extends ListenerAdapter {
     @Override
     public void onReady(@NotNull ReadyEvent event) {
         LOGGER.info("{} is ready", event.getJDA().getSelfUser().getAsTag());
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable(){
+            @Override
+            public void run() {
+                LOGGER.info("Shutting down");
+                event.getJDA().shutdown();
+                BotCommons.shutdown(event.getJDA());
+            }
+        }));
     }
 
     @Override
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
         User user = event.getAuthor();
+
 
         if (user.isBot() || event.isWebhookMessage()){
             return;
