@@ -11,6 +11,7 @@ import org.bson.Document;
 import java.text.DateFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -27,31 +28,34 @@ public class Birthday implements ICommand {
             return;
         }
 
-        final List<Member> members = ctx.getMessage().getMentionedMembers();
+
+        ArrayList<Member> members = new ArrayList<>(ctx.getMessage().getMentionedMembers());
+        ArrayList<String> newArgs = new ArrayList<>(ctx.getArgs());
         if (members.isEmpty()){
-            channel.sendMessage("Please tag the member!").queue();
-            return;
+            members.add(0, ctx.getMember());
+            newArgs.add(1, String.valueOf(ctx.getMember()));
         }
 
-        final Member member = members.get(0);
-        final String action = ctx.getArgs().get(0);
+        Member member = members.get(0);
+        final String action = newArgs.get(0);
 
         switch (action){
             case "add":
-                if (ctx.getArgs().size() != 3){
+                if (newArgs.size() != 3){
                     channel.sendMessage("Please provide a date !").queue();
                 } else {
-                    addUser(member, ctx.getArgs().get(2));
+
+                    addUser(member, newArgs.get(2));
                 }
                 break;
             case "get":
                 getUser(member);
                 break;
             case "modify":
-                if (ctx.getArgs().size() != 3){
+                if (newArgs.size() != 3){
                     channel.sendMessage("Please provide a date !").queue();
                 } else {
-                    modifyUser(member, ctx.getArgs().get(2));
+                    modifyUser(member, newArgs.get(2));
                 }
                 break;
             default:
@@ -92,7 +96,7 @@ public class Birthday implements ICommand {
     }
 
     private Date formatBirthday(String birthday) {
-        SimpleDateFormat formatter = new SimpleDateFormat(Config.get("dateformat"));
+        SimpleDateFormat formatter = new SimpleDateFormat(Config.get("date_format"));
         try {
             return formatter.parse(birthday);
         } catch (ParseException e) {

@@ -16,7 +16,7 @@ public class UserInfoCommand implements ICommand {
     public void handle(CommandContext ctx) {
         final TextChannel channel = ctx.getChannel();
         if (ctx.getArgs().isEmpty()){
-            channel.sendMessage("Usage: `" + Config.get("prefix") + " <user>`").queue();
+            channel.sendMessage("Usage: `" + Config.get("prefix") + "userinfo <user>`").queue();
             return;
         }
 
