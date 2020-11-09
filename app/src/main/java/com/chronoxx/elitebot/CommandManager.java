@@ -1,5 +1,6 @@
 package com.chronoxx.elitebot;
 
+import com.chronoxx.elitebot.command.Birthday;
 import com.chronoxx.elitebot.command.CommandContext;
 import com.chronoxx.elitebot.command.ICommand;
 import com.chronoxx.elitebot.command.commands.*;
@@ -28,6 +29,7 @@ public class CommandManager {
         addCommand(new QueueCommand());
         addCommand(new LeaveCommand());
         addCommand(new UserInfoCommand());
+        addCommand(new Birthday());
     }
 
     private void addCommand(ICommand cmd){
