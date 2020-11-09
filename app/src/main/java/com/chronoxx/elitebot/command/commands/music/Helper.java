@@ -1,17 +1,13 @@
 package com.chronoxx.elitebot.command.commands.music;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import org.apache.commons.validator.routines.UrlValidator;
+
 import java.util.concurrent.TimeUnit;
 
 public class Helper {
     public static boolean isUrl(String url){
-        try {
-            new URI(url);
-            return true;
-        } catch (URISyntaxException e){
-            return false;
-        }
+        UrlValidator urlValidator = new UrlValidator();
+        return urlValidator.isValid(url);
     }
 
     public static String formatTime(long timeInMillis) {

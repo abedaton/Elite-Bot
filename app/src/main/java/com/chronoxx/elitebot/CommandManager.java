@@ -4,6 +4,7 @@ import com.chronoxx.elitebot.command.Birthday;
 import com.chronoxx.elitebot.command.CommandContext;
 import com.chronoxx.elitebot.command.ICommand;
 import com.chronoxx.elitebot.command.commands.*;
+import com.chronoxx.elitebot.command.commands.embed.CreateEmbed;
 import com.chronoxx.elitebot.command.commands.music.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
@@ -30,6 +31,8 @@ public class CommandManager {
         addCommand(new LeaveCommand());
         addCommand(new UserInfoCommand());
         addCommand(new Birthday());
+
+        addCommand(new CreateEmbed());
     }
 
     private void addCommand(ICommand cmd){

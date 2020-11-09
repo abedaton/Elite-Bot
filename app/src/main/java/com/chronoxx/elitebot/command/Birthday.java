@@ -14,10 +14,10 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
+
 
 public class Birthday implements ICommand {
-    MongoDatabaseManager mongoDatabaseManager = new MongoDatabaseManager("EliteServer", "Birthdays");
+    final MongoDatabaseManager mongoDatabaseManager = new MongoDatabaseManager("EliteServer", "Birthdays");
     TextChannel channel;
     @Override
     public void handle(CommandContext ctx) {
@@ -27,14 +27,14 @@ public class Birthday implements ICommand {
             return;
         }
 
-        List<Member> members = ctx.getMessage().getMentionedMembers();
+        final List<Member> members = ctx.getMessage().getMentionedMembers();
         if (members.isEmpty()){
             channel.sendMessage("Please tag the member!").queue();
             return;
         }
 
-        Member member = members.get(0);
-        String action = ctx.getArgs().get(0);
+        final Member member = members.get(0);
+        final String action = ctx.getArgs().get(0);
 
         switch (action){
             case "add":
@@ -65,11 +65,11 @@ public class Birthday implements ICommand {
     }
 
     private void getUser(Member member) {
-        String date = mongoDatabaseManager.getField("Birthday", member.getUser().getName());
+        final String date = mongoDatabaseManager.getField("Birthday", member.getUser().getName());
         if (date != null){
-            channel.sendMessage("The birthday of this user is: " + date).queue();
+            channel.sendMessage("The birthday of " + member.getUser().getName() + " is the: " + date).queue();
         } else {
-            channel.sendMessage("This user is not yet in the database, please add it first!").queue();
+            channel.sendMessage("This user is not yet in the database, please `add` it first!").queue();
         }
     }
 
@@ -79,13 +79,14 @@ public class Birthday implements ICommand {
         } else {
             Date date = formatBirthday(birthday);
             if (date != null) {
-                Calendar calendar = Calendar.getInstance();
+                final Calendar calendar = Calendar.getInstance();
                 calendar.setTime(date);
-                DateFormatSymbols dfs = new DateFormatSymbols();
-                String[] months = dfs.getMonths();
+                final DateFormatSymbols dfs = new DateFormatSymbols();
+                final String[] months = dfs.getMonths();
                 mongoDatabaseManager.addField("Name", member.getUser().getName(), "Birthday",
                         calendar.get(Calendar.DAY_OF_MONTH) + "/" +
                         months[calendar.get(Calendar.MONTH)] + "/" + calendar.get(Calendar.YEAR));
+                channel.sendMessage("The user `" + member.getUser().getName() + "` has been added to the database!").queue();
             }
         }
     }
@@ -112,7 +113,7 @@ public class Birthday implements ICommand {
     @Override
     public String getHelp() {
         return "Manage the birthday of people!\n" +
-                "Usage: `" + Config.get("prefix") + "birthday add/modify @<user> <date>`\n" +
+                "Usage: `" + Config.get("prefix") + "birthday add|modify @<user> <date>`\n" +
                 "Or: `" + Config.get("prefix") + "birthday get @<user>`";
     }
 }
