@@ -78,7 +78,7 @@ public class NextBirthday implements ICommand {
                     .append(futureCalendar.get(Calendar.DAY_OF_MONTH))
                     .append(" of ")
                     .append(months[futureCalendar.get(Calendar.MONTH)])
-                    .append(", he will be/she ")
+                    .append(", he will they ")
                     .append(Period.between( LocalDate.of(Integer.parseInt(members.values().iterator().next()), Integer.parseInt(earliestStringSplit[1]), Integer.parseInt(earliestStringSplit[0])),
                                     now.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()).getYears())
                     .append(" years old !");
@@ -87,7 +87,7 @@ public class NextBirthday implements ICommand {
                 string
                         .append("\n- ")
                         .append(entry.getKey().getUser().getName())
-                        .append(", he will be/she ")
+                        .append(", he will they ")
                         .append(Period.between(LocalDate.of(Integer.parseInt(entry.getValue()), Integer.parseInt(earliestStringSplit[1]), Integer.parseInt(earliestStringSplit[0])),
                                         now.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()).getYears())
                         .append(" years old !");
