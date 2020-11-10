@@ -8,11 +8,10 @@ import net.dv8tion.jda.api.entities.User;
 public class RoleAddCommand implements ICommand {
     @Override
     public void handle(CommandContext ctx) {
-        User author = ctx.getAuthor();
-        System.out.println("heho");
+        final User author = ctx.getAuthor();
         if(!author.isBot()){
-            Member member = ctx.getGuild().getMember(author);
-            String value = String.join(" ", ctx.getArgs());
+            final Member member = ctx.getGuild().getMember(author);
+            final String value = String.join(" ", ctx.getArgs());
             System.out.println(value);
             //member.getRoles().add()
         }

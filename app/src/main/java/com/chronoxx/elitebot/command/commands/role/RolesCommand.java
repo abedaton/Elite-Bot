@@ -13,12 +13,12 @@ import java.util.List;
 public class RolesCommand implements ICommand {
     @Override
     public void handle(CommandContext ctx) {
-        List<Role> listRoles = ctx.getGuild().getRoles();
+        final List<Role> listRoles = ctx.getGuild().getRoles();
         final TextChannel channel = ctx.getChannel();
-        EmbedBuilder eb = new EmbedBuilder();
+        final EmbedBuilder eb = new EmbedBuilder();
+        final ArrayList<String> roleToPrint = new ArrayList<String>();
         eb.setTitle("Roles");
         eb.setColor(Color.orange);
-        ArrayList<String> roleToPrint = new ArrayList<String>();
         roleToPrint.add("773217705222340631");
 
         for (Role role : listRoles) {
