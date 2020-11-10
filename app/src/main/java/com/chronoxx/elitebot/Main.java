@@ -45,7 +45,7 @@ public class Main {
                     .setMemberCachePolicy(MemberCachePolicy.ALL)
                     .enableCache(CacheFlag.VOICE_STATE)
                     .addEventListeners(new Listener())
-                    .setActivity(Activity.playing(" .help"))
+                    .setActivity(Activity.playing(Config.get("prefix") + "help"))
                     .build();
         } catch (LoginException e) {
             System.out.println("Error while launching the bot...");

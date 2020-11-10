@@ -49,12 +49,20 @@ public class NextBirthday implements ICommand {
         } else {
             StringBuilder string = new StringBuilder();
             string.append("The next birthday is: " );
-            final Calendar calendar = Calendar.getInstance();
-            calendar.setTime(mini);
+            final Calendar futureCalendar = Calendar.getInstance();
+            futureCalendar.setTime(mini);
             final DateFormatSymbols dfs = new DateFormatSymbols(Locale.US);
             final String[] months = dfs.getMonths();
             for (Member member : members){
-                string.append(member.getUser().getName()).append(" the ").append(calendar.get(Calendar.DAY_OF_MONTH)).append("/").append(months[calendar.get(Calendar.MONTH)]).append("/").append(calendar.get(Calendar.YEAR)).append("\n");
+                string
+                        .append("\n- ")
+                        .append(member.getUser().getName())
+                        .append(" the ")
+                        .append(futureCalendar.get(Calendar.DAY_OF_MONTH))
+                        .append("/")
+                        .append(months[futureCalendar.get(Calendar.MONTH)])
+                        .append("/")
+                        .append(futureCalendar.get(Calendar.YEAR));
             }
             ctx.getChannel().sendMessage(string.toString()).queue();
         }
