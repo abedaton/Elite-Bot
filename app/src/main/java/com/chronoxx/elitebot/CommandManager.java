@@ -3,6 +3,7 @@ package com.chronoxx.elitebot;
 import com.chronoxx.elitebot.command.Birthday;
 import com.chronoxx.elitebot.command.CommandContext;
 import com.chronoxx.elitebot.command.ICommand;
+import com.chronoxx.elitebot.command.NextBirthday;
 import com.chronoxx.elitebot.command.commands.*;
 import com.chronoxx.elitebot.command.commands.embed.CreateEmbed;
 import com.chronoxx.elitebot.command.commands.music.*;
@@ -31,7 +32,7 @@ public class CommandManager {
         addCommand(new LeaveCommand());
         addCommand(new UserInfoCommand());
         addCommand(new Birthday());
-
+        addCommand(new NextBirthday());
         addCommand(new CreateEmbed());
     }
 

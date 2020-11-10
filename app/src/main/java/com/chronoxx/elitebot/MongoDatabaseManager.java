@@ -1,7 +1,6 @@
 package com.chronoxx.elitebot;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBCursor;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.FindIterable;
@@ -11,7 +10,6 @@ import org.bson.Document;
 
 public class MongoDatabaseManager {
     private final MongoDatabase mongoDatabase;
-
     private final MongoCollection<Document> collection;
     public MongoDatabaseManager(String database, String acollection){
         final String mongoUri = Config.get("MongoDB");
@@ -45,12 +43,7 @@ public class MongoDatabaseManager {
         return findIterable.first() != null;
     }
 
-
-    public MongoDatabase getMongoDatabase() {
-        return mongoDatabase;
-    }
-
-    public MongoCollection<Document> getCollection() {
+    public MongoCollection<Document> getCollection(){
         return collection;
     }
 }

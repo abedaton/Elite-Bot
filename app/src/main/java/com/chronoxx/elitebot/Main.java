@@ -7,6 +7,7 @@ import me.duncte123.botcommons.web.WebUtils;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,12 +33,16 @@ public class Main {
             JDABuilder.createDefault(testPrefix,
                     GatewayIntent.GUILD_MEMBERS,
                     GatewayIntent.GUILD_MESSAGES,
-                    GatewayIntent.GUILD_VOICE_STATES)
+                    GatewayIntent.GUILD_VOICE_STATES,
+                    GatewayIntent.GUILD_MEMBERS,
+                    GatewayIntent.GUILD_PRESENCES)
                     .disableCache(EnumSet.of(
                             CacheFlag.CLIENT_STATUS,
                             CacheFlag.ACTIVITY,
                             CacheFlag.EMOTE
                     ))
+                    .enableIntents(GatewayIntent.GUILD_MEMBERS)
+                    .setMemberCachePolicy(MemberCachePolicy.ALL)
                     .enableCache(CacheFlag.VOICE_STATE)
                     .addEventListeners(new Listener())
                     .setActivity(Activity.playing(" .help"))

@@ -2,11 +2,8 @@ package com.chronoxx.elitebot.command;
 
 import com.chronoxx.elitebot.Config;
 import com.chronoxx.elitebot.MongoDatabaseManager;
-import com.mongodb.BasicDBObject;
-import com.mongodb.client.FindIterable;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
-import org.bson.Document;
 
 import java.text.DateFormatSymbols;
 import java.text.ParseException;
@@ -14,7 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
+import java.util.Locale;
 
 
 public class Birthday implements ICommand {
@@ -85,7 +82,11 @@ public class Birthday implements ICommand {
             if (date != null) {
                 final Calendar calendar = Calendar.getInstance();
                 calendar.setTime(date);
-                final DateFormatSymbols dfs = new DateFormatSymbols();
+                if (calendar.get(Calendar.YEAR) < 1900){
+                    channel.sendMessage("Invalid date format ! Please use this format: " + Config.get("date_format")).queue();
+                    return;
+                }
+                final DateFormatSymbols dfs = new DateFormatSymbols(Locale.US);
                 final String[] months = dfs.getMonths();
                 mongoDatabaseManager.addField("Name", member.getUser().getName(), "Birthday",
                         calendar.get(Calendar.DAY_OF_MONTH) + "/" +
@@ -96,11 +97,12 @@ public class Birthday implements ICommand {
     }
 
     private Date formatBirthday(String birthday) {
-        SimpleDateFormat formatter = new SimpleDateFormat(Config.get("date_format"));
+        SimpleDateFormat formatter = new SimpleDateFormat(Config.get("date_format"), Locale.US);
+        formatter.setLenient(false);
         try {
             return formatter.parse(birthday);
         } catch (ParseException e) {
-            channel.sendMessage("Invalid date format ! Please use this format: " + Config.get("dateformat")).queue();
+            channel.sendMessage("Invalid date format ! Please use this format: " + Config.get("date_format")).queue();
             return null;
         }
     }
