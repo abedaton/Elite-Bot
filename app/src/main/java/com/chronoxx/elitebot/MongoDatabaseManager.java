@@ -1,49 +1,84 @@
 package com.chronoxx.elitebot;
 
-import com.mongodb.BasicDBObject;
+import com.chronoxx.elitebot.command.CommandContext;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import net.dv8tion.jda.api.entities.Member;
 import org.bson.Document;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+
 
 public class MongoDatabaseManager {
-    private final MongoDatabase mongoDatabase;
     private final MongoCollection<Document> collection;
-    public MongoDatabaseManager(String database, String acollection){
+
+    public MongoDatabaseManager(String database, String acollection) {
         final String mongoUri = Config.get("MongoDB");
         MongoClientURI clientURI = new MongoClientURI(mongoUri);
         MongoClient mongoClient = new MongoClient(clientURI);
 
-        mongoDatabase = mongoClient.getDatabase(database);
+        MongoDatabase mongoDatabase = mongoClient.getDatabase(database);
         collection = mongoDatabase.getCollection(acollection);
     }
 
-    public void addField(String key1, String value1, String key2, String value2){
-        Document document = new Document(key1, value1);
-        document.append(key2, value2);
-        collection.insertOne(document);
-    }
 
-
-    public String getField(String key1, String value1){
-        FindIterable<Document> result = collection.find(new BasicDBObject("Name", value1));
-        if (result.first() != null){
-            return result.first().get(key1).toString();
-        } else {
+    public String getUser(String guildId, String memberName) {
+        try (MongoCursor<Document> cursor = collection.find().iterator()) {
+            while (cursor.hasNext()) {
+                JSONObject json = new JSONObject(cursor.next().toJson());
+                if (json.has(guildId)) {
+                    if (json.getJSONObject(guildId).getString("Name").equals(memberName)){
+                        return json.getJSONObject(guildId).getString("Birthday");
+                    }
+                }
+            }
             return null;
         }
     }
 
-    public boolean exists(String key1, String value1){
-        BasicDBObject where  = new BasicDBObject();
-        where.put(key1, value1);
-        FindIterable<Document> findIterable = collection.find(where);
-        return findIterable.first() != null;
+    private boolean isUserInDb(String guildId, String username){
+        try (MongoCursor<Document> cursor = collection.find().iterator()) {
+            while (cursor.hasNext()) {
+                JSONObject json = new JSONObject(cursor.next().toJson());
+                if (json.has(guildId)) {
+                    if (json.getJSONObject(guildId).getString("Name").equals(username)){
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
     }
 
-    public MongoCollection<Document> getCollection(){
-        return collection;
+
+    public boolean addBirthday(String guildId, String username, String date){
+        if (isUserInDb(guildId, username)){
+            return false;
+        }
+        Document doc = new Document(guildId, new Document("Name", username).append("Birthday", date));
+        collection.insertOne(doc);
+        return true;
     }
+
+
+    public HashMap<Member, String> getAllBirthdayOfGuild(String guildId, CommandContext ctx){
+        HashMap<Member, String> map = new HashMap<>();
+        try (MongoCursor<Document> cursor = collection.find().iterator()) {
+            while (cursor.hasNext()) {
+                JSONObject json = new JSONObject(cursor.next().toJson());
+                if (json.has(guildId)) {
+                    String username = json.getJSONObject(guildId).getString("Name");
+                    Member member = ctx.getGuild().getMembersByEffectiveName(username, false).get(0);
+                    String date = json.getJSONObject(guildId).getString("Birthday");
+                    map.put(member, date);
+                }
+            }
+        }
+        return map;
+    }
+
 }

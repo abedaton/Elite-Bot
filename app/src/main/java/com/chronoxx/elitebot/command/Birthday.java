@@ -5,12 +5,9 @@ import com.chronoxx.elitebot.MongoDatabaseManager;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 
-import java.text.DateFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Locale;
 
 
@@ -38,21 +35,16 @@ public class Birthday implements ICommand {
 
         switch (action){
             case "add":
-                if (newArgs.size() != 3){
-                    channel.sendMessage("Please provide a date !").queue();
-                } else {
-
-                    addUser(member, newArgs.get(2));
-                }
+                this.add(newArgs, ctx, member);
                 break;
             case "get":
-                getUser(member);
+                this.get(ctx, member);
                 break;
             case "modify":
                 if (newArgs.size() != 3){
                     channel.sendMessage("Please provide a date !").queue();
                 } else {
-                    modifyUser(member, newArgs.get(2));
+                    channel.sendMessage("This is not yet implemented :sob:").queue();
                 }
                 break;
             default:
@@ -61,55 +53,59 @@ public class Birthday implements ICommand {
         }
     }
 
-    private void modifyUser(Member member, String s) {
-        channel.sendMessage("This is not yet implemented :sob:").queue();
+
+
+
+
+    private void add(ArrayList<String> newArgs, CommandContext ctx, Member member) {
+        if (newArgs.size() != 3){
+            channel.sendMessage("Please provide a date !").queue();
+        } else {
+            if (rightFormat(newArgs.get(2))) {
+                if (mongoDatabaseManager.addBirthday(ctx.getGuild().getId(), member.getEffectiveName(), newArgs.get(2))){
+                    channel.sendMessage("The user `" + member.getUser().getName() + "` has been added to the database!").queue();
+                } else {
+                    channel.sendMessage("This user is already in the database !").queue();
+                }
+            } else {
+                channel.sendMessage("Invalid date format ! Please use this format: " + Config.get("date_format")).queue();
+            }
+        }
     }
 
-    private void getUser(Member member) {
-        final String date = mongoDatabaseManager.getField("Birthday", member.getUser().getName());
+
+    private void get(CommandContext ctx, Member member){
+        String date = mongoDatabaseManager.getUser(ctx.getGuild().getId(), member.getEffectiveName());
         if (date != null){
-            channel.sendMessage("The birthday of " + member.getUser().getName() + " is the: " + date).queue();
+            String newDate = convertDateToBigMonths(date);
+            if (newDate != null){
+                channel.sendMessage("The birthday of " + member.getEffectiveName() + " is the: " + newDate).queue();
+            } else {
+                channel.sendMessage("Error in parsing..").queue();
+            }
         } else {
             channel.sendMessage("This user is not yet in the database, please `add` it first!").queue();
         }
     }
 
-    private void addUser(Member member, String birthday) {
-        if (memberExists(member)){
-            channel.sendMessage("This user is already in the database !").queue();
-        } else {
-            Date date = formatBirthday(birthday);
-            if (date != null) {
-                final Calendar calendar = Calendar.getInstance();
-                calendar.setTime(date);
-                if (calendar.get(Calendar.YEAR) < 1900){
-                    channel.sendMessage("Invalid date format ! Please use this format: " + Config.get("date_format")).queue();
-                    return;
-                }
-                final DateFormatSymbols dfs = new DateFormatSymbols(Locale.US);
-                final String[] months = dfs.getMonths();
-                mongoDatabaseManager.addField("Name", member.getUser().getName(), "Birthday",
-                        calendar.get(Calendar.DAY_OF_MONTH) + "/" +
-                        months[calendar.get(Calendar.MONTH)] + "/" + calendar.get(Calendar.YEAR));
-                channel.sendMessage("The user `" + member.getUser().getName() + "` has been added to the database!").queue();
-            }
-        }
+
+    private boolean rightFormat(String date) {
+        return date.matches("([0-9]{2})/([0-9]{2})/([0-9]{4})");
     }
 
-    private Date formatBirthday(String birthday) {
-        SimpleDateFormat formatter = new SimpleDateFormat(Config.get("date_format"), Locale.US);
-        formatter.setLenient(false);
+    private String convertDateToBigMonths(String oldDate){
+        Locale locale = new Locale("en", "US");
+        SimpleDateFormat oldFormat = new SimpleDateFormat(Config.get("INPUT_DATE_FORMAT"), locale);
+        SimpleDateFormat newFormat = new SimpleDateFormat(Config.get("PRINT_DATE_FORMAT"), locale);
         try {
-            return formatter.parse(birthday);
+            return newFormat.format(oldFormat.parse(oldDate));
         } catch (ParseException e) {
-            channel.sendMessage("Invalid date format ! Please use this format: " + Config.get("date_format")).queue();
+            e.printStackTrace();
             return null;
         }
     }
 
-    private boolean memberExists(Member member) {
-        return mongoDatabaseManager.exists("Name", member.getUser().getName());
-    }
+
 
     @Override
     public String getName() {
