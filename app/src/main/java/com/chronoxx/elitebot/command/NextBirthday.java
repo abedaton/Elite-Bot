@@ -10,9 +10,13 @@ import java.text.DateFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.MonthDay;
 import java.time.Period;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class NextBirthday implements ICommand {
     @Override
@@ -27,25 +31,34 @@ public class NextBirthday implements ICommand {
         }
 
 
-        SimpleDateFormat formatter = new SimpleDateFormat(Config.get("INPUT_DATE_FORMAT"), new Locale("en", "US"));
-        NavigableSet<String> stringDates = new TreeSet<>(map.values());
-        NavigableSet<Date> dates = new TreeSet<>();
+        Collection<String> stringDates = map.values();
+        List<LocalDate> dates = new ArrayList<>();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         for (String date : stringDates){
-            try {
-                dates.add(formatter.parse(date));
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
+            dates.add(LocalDate.parse(date, formatter));
+        }
+        System.out.println(dates);
+
+        Function<LocalDate, Integer> key = (d) -> d.getMonthValue() * 100 + d.getDayOfMonth();
+        Map<Integer, List<LocalDate>> lookup =  dates.stream().collect(Collectors.groupingBy(key));
+        List<Integer> searchIndex = lookup.keySet().stream().sorted().collect(Collectors.toList());
+        int index = Collections.binarySearch(searchIndex, key.apply(LocalDate.now()));
+
+        if (index < 0){
+            index = -index -1;
+        }
+        if (index >= searchIndex.size()){
+            index = 0;
         }
 
-        Date now = new Date();
-        Date earliest = dates.lower(now);
-        if (earliest == null){
+        List<LocalDate> localDates = lookup.get(searchIndex.get(index));
+
+        if (localDates.isEmpty()){
             channel.sendMessage("There is no birthday in this server !").queue();
             return;
         }
 
-        String earliestString = formatter.format(earliest);
+        String earliestString = formatter.format(localDates.get(0));
         String[] earliestStringSplit = earliestString.split("/");
         Map<Member, String> members = new HashMap<>();
 
@@ -57,39 +70,39 @@ public class NextBirthday implements ICommand {
         }
 
 
-
+        Date now = new Date();
         StringBuilder string = new StringBuilder();
         boolean solo = false;
         final Calendar futureCalendar = Calendar.getInstance();
-        futureCalendar.setTime(earliest);
+        futureCalendar.setTime(java.sql.Date.valueOf(localDates.get(0)));
         final DateFormatSymbols dfs = new DateFormatSymbols(Locale.US);
         final String[] months = dfs.getMonths();
         if (members.size() == 1){
             solo = true;
-            string.append("The next birthday is " );
+            string.append("The next birthday is: " );
         }else {
-            string.append("The next birthdays are the ").append(futureCalendar.get(Calendar.DAY_OF_MONTH))
+            string.append("The next birthdays are: ").append(futureCalendar.get(Calendar.DAY_OF_MONTH))
                     .append(" of ")
                     .append(months[futureCalendar.get(Calendar.MONTH)]);
         }
         if (solo){
             string.append(members.keySet().iterator().next().getUser().getName())
-                    .append(" the ")
+                    .append(", the ")
                     .append(futureCalendar.get(Calendar.DAY_OF_MONTH))
                     .append(" of ")
                     .append(months[futureCalendar.get(Calendar.MONTH)])
-                    .append(", he will they ")
+                    .append(", they will be ")
                     .append(Period.between( LocalDate.of(Integer.parseInt(members.values().iterator().next()), Integer.parseInt(earliestStringSplit[1]), Integer.parseInt(earliestStringSplit[0])),
-                                    now.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()).getYears())
+                                    now.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()).getYears() + 1)
                     .append(" years old !");
         } else {
             for (Map.Entry<Member, String> entry : members.entrySet()) {
                 string
                         .append("\n- ")
                         .append(entry.getKey().getUser().getName())
-                        .append(", he will they ")
+                        .append(", they will be ")
                         .append(Period.between(LocalDate.of(Integer.parseInt(entry.getValue()), Integer.parseInt(earliestStringSplit[1]), Integer.parseInt(earliestStringSplit[0])),
-                                        now.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()).getYears())
+                                        now.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()).getYears() + 1)
                         .append(" years old !");
             }
         }
